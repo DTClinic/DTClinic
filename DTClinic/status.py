@@ -34,11 +34,20 @@ class Status():
         print("=========== summary ===========")
         print("- Versions:")
         print(f"Pytorch: {torch.__version__}")
-        print(f"CUDA: {torch.version.cuda}")
-        nccl_version = torch.cuda.nccl.version()
-        print(f"NCCL: {nccl_version[0]}.{nccl_version[1]},{nccl_version[2]}")
-        if torch.__version__ < '1.10' or nccl_version[1] < 10:
-            print("Please update to the newest version of PyTorch if possible.")
+        if torch.cuda.is_available():
+            print(f"CUDA: {torch.version.cuda}")
+            nccl_version = torch.cuda.nccl.version()
+            print(f"NCCL: {nccl_version[0]}.{nccl_version[1]},{nccl_version[2]}")
+            if nccl_version[1] < 10:
+                print("Please update to the newest version of NCCL if possible.")
+            list_18 = ['10.2', '11.1', '11.3']
+            if torch.__version__ > '1.8' and torch.version.cuda not in list_18:
+                print("Please use CUDA 10.2, 11.1 or 11.3, or downgrade PyTorch version.")
+            elif torch.__version__[:3] == '1.7' and torch.version.cuda > '11.0':
+                print(f"Please use an older version of CUDA. Currnetly using {torch.version.cuda}.")
+        else:
+            print("CUDA not avaiable for PyTorch. For distributed training on GPU, please install CUDA or install PyTorch in a version that supports CUDA.")
+        
         print("- Environmental variables:")
         for key in os.environ:
             print(f"{key}={os.environ[key]}")
